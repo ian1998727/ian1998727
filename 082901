@@ -1,0 +1,81 @@
+確認項目
+1. asyncDB.js 功能是否正常？
+2. fixture.js 可以正常呼叫？
+3. index.js 需要分段測試
+
+建議
+1. function 分開比較好除錯
+2. 主程式分段檢查
+  
+  
+範例檢查step
+
+1. 
+//----------------------------------------
+// 監聽3000埠號, 
+// 或是監聽Heroku設定的埠號
+//----------------------------------------
+var server = app.listen(process.env.PORT || 3000, function() {
+    const port = server.address().port;
+    console.log("正在監聽埠號:", port);
+});
+
+2. 
+//----------------------------------------
+// 建立一個網站應用程式app
+// 如果連接根目錄, 交給機器人處理
+//----------------------------------------
+const app = express();
+const linebotParser = bot.parser();
+app.post('/', linebotParser);
+
+
+3. 
+//----------------------------------------
+// 可直接取用檔案的資料夾
+//----------------------------------------
+app.use(express.static('topic'));
+
+
+4. 
+//----------------------------------------
+// 填入自己在Line Developers的channel值
+//----------------------------------------
+var bot = linebot({
+    channelId: '填入自己的資料',
+    channelSecret: '填入自己的資料',
+    channelAccessToken: '填入自己的資料'
+});
+
+
+5. 
+//--------------------------------
+// 機器人接受訊息的處理
+//--------------------------------
+bot.on('message', function(event) {    
+    event.source.profile().then(
+        function (profile) {
+            //取得使用者資料
+            const userName = profile.displayName;
+            const userId = profile.userId;
+	    
+            //使用者傳來的件號
+            const no = event.message.text;
+          
+            //呼叫API取得工件資料
+            fixture.fetchfixture(no).then(data => {  
+                if (data == -1){
+                    event.reply('找不到資料');
+                }else if(data == -9){                    
+                    event.reply('執行錯誤');
+                }else{
+                    event.reply([
+                        {'type':'text', 'text':data.fixno},
+                        {'type':'text', 'text':data.fixname},
+                        {'type':'text', 'text':data.model}]
+                    );  
+                }  
+            })  
+        }
+    );
+});
